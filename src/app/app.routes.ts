@@ -63,9 +63,9 @@ export const routes: Routes = [
       },
       {
         path: 'consultas-reclamos',
-        loadComponent: () => import('./features/atenciones/consultas-reclamos.component').then(m => m.ConsultasReclamosComponent),
+        loadComponent: () => import('./features/consultas-reclamos/consultas-reclamos.component').then(m => m.ConsultasReclamosComponent),
         canActivate: [roleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN', 'MOZO'] }
       }
     ]
   },
