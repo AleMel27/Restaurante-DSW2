@@ -1,0 +1,99 @@
+<div class="clientes-page">
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">Gestión de Clientes</h1>
+      <p class="page-subtitle">Padrón de clientes registrados para comandas (`pedidos-service` :8082)</p>
+    </div>
+
+    <button class="btn btn-primary" (click)="abrirCrear()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Registrar Nuevo Cliente
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Consultando clientes...</p>
+    </div>
+  } @else {
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>DNI</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of clientes(); track c.idcliente) {
+              <tr>
+                <td class="font-mono">#{{ c.idcliente }}</td>
+                <td class="font-bold">{{ c.nombres }} {{ c.apellidos }}</td>
+                <td><span class="table-badge">{{ c.dni }}</span></td>
+                <td>{{ c.telefono }}</td>
+                <td>{{ c.correo }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL NUEVO CLIENTE -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">Registrar Nuevo Cliente</h2>
+          <button class="close-btn" (click)="cerrarModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="clienteForm" (ngSubmit)="guardarCliente()">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Nombres</label>
+              <input type="text" class="form-control" formControlName="nombres" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" formControlName="apellidos" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">DNI (8 dígitos numéricos)</label>
+            <input type="text" class="form-control" formControlName="dni" maxlength="8" />
+            @if (clienteForm.get('dni')?.invalid && clienteForm.get('dni')?.touched) {
+              <span class="form-error">Ingrese un DNI válido de 8 dígitos</span>
+            }
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" formControlName="telefono" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico</label>
+              <input type="email" class="form-control" formControlName="correo" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

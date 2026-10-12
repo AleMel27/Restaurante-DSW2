@@ -1,0 +1,150 @@
+<div class="mesas-page">
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">Gestión de Mesas del Restaurante</h1>
+      <p class="page-subtitle">Disponibilidad en tiempo real (`mesas-service` :8084)</p>
+    </div>
+
+    @if (authService.hasRole('ADMIN')) {
+      <button class="btn btn-primary" (click)="abrirCrear()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Registrar Nueva Mesa
+      </button>
+    }
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'TODAS'" (click)="filtroEstado.set('TODAS')">
+        Todas ({{ mesas().length }})
+      </button>
+      <button class="filter-tab" [class.active]="filtroEstado() === 'DISPONIBLE'" (click)="filtroEstado.set('DISPONIBLE')">
+        <span class="tab-dot dot-success"></span> Disponibles
+      </button>
+      <button class="filter-tab" [class.active]="filtroEstado() === 'OCUPADA'" (click)="filtroEstado.set('OCUPADA')">
+        <span class="tab-dot dot-danger"></span> Ocupadas
+      </button>
+      <button class="filter-tab" [class.active]="filtroEstado() === 'RESERVADA'" (click)="filtroEstado.set('RESERVADA')">
+        <span class="tab-dot dot-warning"></span> Reservadas
+      </button>
+      <button class="filter-tab" [class.active]="filtroEstado() === 'MANTENIMIENTO'" (click)="filtroEstado.set('MANTENIMIENTO')">
+        <span class="tab-dot dot-muted"></span> Mantenimiento
+      </button>
+    </div>
+  </div>
+
+  <!-- Rejilla de Mesas -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando mesas desde mesas-service...</p>
+    </div>
+  } @else if (mesasFiltradas.length === 0) {
+    <div class="empty-state card">
+      <p>No se encontraron mesas para este criterio de filtro.</p>
+    </div>
+  } @else {
+    <div class="mesas-grid">
+      @for (mesa of mesasFiltradas; track mesa.idMesa) {
+        <div class="mesa-card" [ngClass]="'status-' + mesa.estado.toLowerCase()">
+          <div class="mesa-card-header">
+            <span class="mesa-number">MESA {{ mesa.numero }}</span>
+            <span class="badge" [ngClass]="{
+              'badge-success': mesa.estado === 'DISPONIBLE',
+              'badge-danger': mesa.estado === 'OCUPADA',
+              'badge-warning': mesa.estado === 'RESERVADA',
+              'badge-info': mesa.estado === 'MANTENIMIENTO'
+            }">
+              {{ mesa.estado }}
+            </span>
+          </div>
+
+          <div class="mesa-visual">
+            <div class="table-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+                <line x1="8" y1="18" x2="8" y2="21"></line>
+                <line x1="16" y1="18" x2="16" y2="21"></line>
+              </svg>
+            </div>
+            <span class="capacity-info">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+              </svg>
+              Capacidad: {{ mesa.capacidad }} personas
+            </span>
+          </div>
+
+          <div class="mesa-desc">
+            {{ mesa.descripcion || 'Sin descripción especial' }}
+          </div>
+
+          @if (authService.hasRole('ADMIN')) {
+            <div class="mesa-card-actions">
+              <button class="btn btn-secondary btn-sm" (click)="abrirEditar(mesa)">
+                Editar
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="eliminarMesa(mesa)">
+                Eliminar
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODAL CREAR / EDITAR MESA (SOLO ADMIN) -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">{{ isEditing() ? 'Actualizar Mesa' : 'Registrar Nueva Mesa' }}</h2>
+          <button class="close-btn" (click)="cerrarModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="mesaForm" (ngSubmit)="guardarMesa()">
+          <div class="form-group">
+            <label class="form-label">Número de Mesa</label>
+            <input type="number" class="form-control" formControlName="numero" />
+            @if (mesaForm.get('numero')?.invalid && mesaForm.get('numero')?.touched) {
+              <span class="form-error">El número de mesa es requerido y debe ser positivo</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Capacidad (Personas)</label>
+            <input type="number" class="form-control" formControlName="capacidad" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Estado Inicial</label>
+            <select class="form-control" formControlName="estado">
+              <option value="DISPONIBLE">DISPONIBLE</option>
+              <option value="OCUPADA">OCUPADA</option>
+              <option value="RESERVADA">RESERVADA</option>
+              <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descripción / Ubicación</label>
+            <input type="text" class="form-control" formControlName="descripcion" placeholder="ej. Terraza vista exterior, Salón principal" />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ isEditing() ? 'Actualizar Cambios' : 'Guardar Mesa' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,186 @@
+<div class="dashboard-container">
+  <!-- BIENVENIDA -->
+  <div class="welcome-banner">
+    <div class="welcome-info">
+      <h1 class="welcome-title">¡Bienvenido, {{ currentUserName() }}!</h1>
+      <p class="welcome-subtitle">
+        Panel de operaciones centralizado para el restaurante. Sesión activa con rol
+        <span class="badge" [ngClass]="{
+          'badge-danger': currentRole() === 'ADMIN',
+          'badge-info': currentRole() === 'MOZO',
+          'badge-success': currentRole() === 'CHEF'
+        }">{{ currentRole() }}</span>
+      </p>
+    </div>
+    <div class="welcome-actions">
+      @if (authService.hasRole(['ADMIN', 'MOZO'])) {
+        <a routerLink="/pedidos" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Nuevo Pedido
+        </a>
+      }
+      <a routerLink="/mesas" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+        </svg>
+        Ver Salón de Mesas
+      </a>
+    </div>
+  </div>
+
+  <!-- TARJETAS DE MÉTRICAS -->
+  <div class="metrics-grid">
+    <!-- Métricas Mesas -->
+    <div class="metric-card">
+      <div class="metric-icon-box amber-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+          <line x1="8" y1="18" x2="8" y2="21"></line>
+          <line x1="16" y1="18" x2="16" y2="21"></line>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Mesas Disponibles</span>
+        <div class="metric-value">
+          <span class="number text-success">{{ mesasDisponibles() }}</span>
+          <span class="total-denom">/ {{ totalMesas() }} totales</span>
+        </div>
+        <div class="metric-foot">
+          <span class="badge badge-warning">{{ mesasOcupadas() }} Ocupadas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Pedidos -->
+    <div class="metric-card">
+      <div class="metric-icon-box blue-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Pedidos Activos</span>
+        <div class="metric-value">
+          <span class="number text-info">{{ totalPedidos() }}</span>
+          <span class="total-denom">comandas</span>
+        </div>
+        <div class="metric-foot">
+          <span class="badge badge-info">S/ {{ montoTotal() | number:'1.2-2' }} ventas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Atenciones -->
+    <div class="metric-card">
+      <div class="metric-icon-box green-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Atenciones Pendientes</span>
+        <div class="metric-value">
+          <span class="number text-warning">{{ totalAtenciones() }}</span>
+          <span class="total-denom">en mesa</span>
+        </div>
+        <div class="metric-foot">
+          <span class="badge badge-warning">Servicio en curso</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Reclamos -->
+    <div class="metric-card">
+      <div class="metric-icon-box rose-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Reclamos por Resolver</span>
+        <div class="metric-value">
+          <span class="number" [class.text-danger]="totalReclamosAbiertos() > 0">{{ totalReclamosAbiertos() }}</span>
+          <span class="total-denom">casos abiertos</span>
+        </div>
+        <div class="metric-foot">
+          <span class="badge" [ngClass]="totalReclamosAbiertos() > 0 ? 'badge-danger' : 'badge-success'">
+            {{ totalReclamosAbiertos() > 0 ? 'Requiere Atención' : 'Al Día' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE PEDIDOS RECIENTES -->
+  <div class="recent-section card">
+    <div class="section-header">
+      <div class="section-title-box">
+        <h2 class="section-title">Últimos Pedidos Registrados</h2>
+        <span class="section-subtitle">Sincronizados en tiempo real con `pedidos-service` (:8082)</span>
+      </div>
+      <a routerLink="/pedidos" class="btn btn-secondary btn-sm">Ver todos</a>
+    </div>
+
+    @if (pedidosActivos().length === 0) {
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p>No hay pedidos registrados en este momento.</p>
+        @if (authService.hasRole(['ADMIN', 'MOZO'])) {
+          <a routerLink="/pedidos" class="btn btn-primary btn-sm">Crear Primer Pedido</a>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Mesa</th>
+              <th>Cliente</th>
+              <th>Mozo</th>
+              <th>Platos Solicitados</th>
+              <th>Estado</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pedido of pedidosActivos(); track pedido.idPedido) {
+              <tr>
+                <td class="font-mono">#{{ pedido.idPedido }}</td>
+                <td>
+                  <span class="table-badge">Mesa {{ pedido.NumeroMesa }}</span>
+                </td>
+                <td>{{ pedido.nombreCliente }} {{ pedido.apellidoCliente }}</td>
+                <td>{{ pedido.nombreMozo }} {{ pedido.apellidoMozo }}</td>
+                <td>
+                  <div class="dish-tags">
+                    @for (det of pedido.detalles; track det.idPlato) {
+                      <span class="dish-tag">{{ det.cantidad }}x {{ det.nombrePlato }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-info">{{ pedido.estado }}</span>
+                </td>
+                <td class="font-bold">S/ {{ pedido.total | number:'1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

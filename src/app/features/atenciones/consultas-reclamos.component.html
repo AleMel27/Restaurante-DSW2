@@ -1,0 +1,157 @@
+<div class="consultas-reclamos-page">
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">Centro de Atención al Cliente</h1>
+      <p class="page-subtitle">Resolución de Reclamos y Respuestas a Consultas (`atenciones-service` :8083)</p>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="tab-switcher">
+      <button class="tab-btn" [class.active]="tabActivo() === 'RECLAMOS'" (click)="tabActivo.set('RECLAMOS')">
+        Reclamos ({{ reclamos().length }})
+      </button>
+      <button class="tab-btn" [class.active]="tabActivo() === 'CONSULTAS'" (click)="tabActivo.set('CONSULTAS')">
+        Consultas ({{ consultas().length }})
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando información...</p>
+    </div>
+  } @else if (tabActivo() === 'RECLAMOS') {
+    <!-- TABLA DE RECLAMOS -->
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ID Cliente</th>
+              <th>Motivo</th>
+              <th>Descripción</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Respuesta Registrada</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of reclamos(); track r.idReclamo) {
+              <tr>
+                <td class="font-mono">#{{ r.idReclamo }}</td>
+                <td>Cliente #{{ r.idCliente }}</td>
+                <td class="font-bold">{{ r.motivo }}</td>
+                <td>{{ r.descripcion }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-danger': r.prioridad === 'ALTA',
+                    'badge-warning': r.prioridad === 'MEDIA',
+                    'badge-info': r.prioridad === 'BAJA'
+                  }">
+                    {{ r.prioridad }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-danger': r.estado === 'ABIERTO',
+                    'badge-warning': r.estado === 'EN_REVISION',
+                    'badge-success': r.estado === 'RESUELTO' || r.estado === 'CERRADO'
+                  }">
+                    {{ r.estado }}
+                  </span>
+                </td>
+                <td class="response-cell">{{ r.respuesta || 'Sin respuesta aún' }}</td>
+                <td>
+                  <button class="btn btn-primary btn-sm" (click)="abrirResolverReclamo(r)">
+                    {{ r.respuesta ? 'Modificar' : 'Resolver' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <!-- TABLA DE CONSULTAS -->
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ID Cliente</th>
+              <th>Asunto</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Respuesta</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of consultas(); track c.idConsulta) {
+              <tr>
+                <td class="font-mono">#{{ c.idConsulta }}</td>
+                <td>Cliente #{{ c.idCliente }}</td>
+                <td class="font-bold">{{ c.asunto }}</td>
+                <td>{{ c.descripcion }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-warning': c.estado === 'PENDIENTE' || c.estado === 'EN_PROCESO',
+                    'badge-success': c.estado === 'RESPONDIDA' || c.estado === 'CERRADA'
+                  }">
+                    {{ c.estado }}
+                  </span>
+                </td>
+                <td class="response-cell">{{ c.respuesta || 'Sin responder' }}</td>
+                <td>
+                  <button class="btn btn-primary btn-sm" (click)="abrirResponderConsulta(c)">
+                    {{ c.respuesta ? 'Modificar' : 'Responder' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE RESPUESTA / RESOLUCIÓN -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{ modalTipo() === 'RECLAMO' ? 'Resolver Reclamo #' + selectedId() : 'Responder Consulta #' + selectedId() }}
+          </h2>
+          <button class="close-btn" (click)="cerrarModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="respuestaForm" (ngSubmit)="enviarRespuesta()">
+          <div class="form-group">
+            <label class="form-label">Respuesta Oficial del Restaurante</label>
+            <textarea
+              class="form-control"
+              formControlName="respuesta"
+              rows="4"
+              placeholder="Escriba la solución, descargo o respuesta para el cliente..."></textarea>
+            @if (respuestaForm.get('respuesta')?.invalid && respuestaForm.get('respuesta')?.touched) {
+              <span class="form-error">La respuesta debe tener al menos 5 caracteres</span>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ modalTipo() === 'RECLAMO' ? 'Registrar Resolución' : 'Enviar Respuesta' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

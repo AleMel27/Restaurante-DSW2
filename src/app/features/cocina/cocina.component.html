@@ -1,0 +1,68 @@
+<div class="cocina-page">
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">Monitor de Cocina (KDS)</h1>
+      <p class="page-subtitle">Visualización operativa para el Chef y preparación de comandas en tiempo real</p>
+    </div>
+
+    <button class="btn btn-secondary" (click)="cargarComandas()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6"></path>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+      Actualizar Comandas
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando comandas en cocina...</p>
+    </div>
+  } @else if (pedidos().length === 0) {
+    <div class="empty-state card">
+      <p>No hay órdenes pendientes en la cocina. ¡Todo listo!</p>
+    </div>
+  } @else {
+    <div class="kds-grid">
+      @for (pedido of pedidos(); track pedido.idPedido) {
+        <div class="kds-ticket card" [class.ticket-ready]="pedido.estado === 'LISTO'">
+          <div class="kds-header">
+            <span class="kds-mesa">MESA {{ pedido.NumeroMesa }}</span>
+            <span class="kds-id">#{{ pedido.idPedido }}</span>
+          </div>
+
+          <div class="kds-meta">
+            <span>Mozo: <strong>{{ pedido.nombreMozo }} {{ pedido.apellidoMozo }}</strong></span>
+            <span>Hora: {{ pedido.fechaHoraRegistro | date:'mediumTime' }}</span>
+          </div>
+
+          <div class="kds-items">
+            @for (det of pedido.detalles; track det.idPlato) {
+              <div class="kds-item">
+                <span class="kds-qty">{{ det.cantidad }}</span>
+                <span class="kds-name">{{ det.nombrePlato }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="kds-actions">
+            <button
+              class="btn btn-sm"
+              [class.btn-primary]="pedido.estado === 'REGISTRADO'"
+              [class.btn-secondary]="pedido.estado !== 'REGISTRADO'"
+              (click)="cambiarEstado(pedido, 'EN_PREPARACION')">
+              En Preparación
+            </button>
+            <button
+              class="btn btn-sm btn-primary"
+              [class.btn-ready]="pedido.estado === 'LISTO'"
+              (click)="cambiarEstado(pedido, 'LISTO')">
+              ¡Listo!
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

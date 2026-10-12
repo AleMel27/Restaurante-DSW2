@@ -1,0 +1,307 @@
+/* ===================================================================
+   SISTEMA DE DISEÑO GLOBAL - DSW2 RESTOPRO
+   =================================================================== */
+
+:root {
+  /* Paleta Base - Dark / Modern Gastronomy */
+  --bg-main: #0b0f17;
+  --bg-surface: #121824;
+  --bg-surface-elevated: #1a2234;
+  --bg-surface-hover: #222c42;
+  --bg-glass: rgba(18, 24, 36, 0.75);
+
+  /* Bordes & Líneas */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-focus: #f59e0b;
+
+  /* Tipografía */
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0f17;
+
+  /* Acentos de Marca (Cálido y Gastronómico) */
+  --brand-primary: #f59e0b;      /* Ámbar / Dorado */
+  --brand-primary-hover: #d97706;
+  --brand-primary-glow: rgba(245, 158, 11, 0.25);
+
+  --brand-accent: #ff6b35;       /* Coral flama */
+  --brand-accent-hover: #e85822;
+
+  /* Estados Funcionales */
+  --state-success: #10b981;      /* DISPONIBLE, FINALIZADA, LISTO */
+  --state-success-bg: rgba(16, 185, 129, 0.12);
+  --state-success-border: rgba(16, 185, 129, 0.3);
+
+  --state-warning: #f59e0b;      /* EN_ATENCION, EN_PROCESO, PENDIENTE */
+  --state-warning-bg: rgba(245, 158, 11, 0.12);
+  --state-warning-border: rgba(245, 158, 11, 0.3);
+
+  --state-danger: #ef4444;       /* OCUPADA, CANCELADA, RECLAMO ABIERTO */
+  --state-danger-bg: rgba(239, 68, 68, 0.12);
+  --state-danger-border: rgba(239, 68, 68, 0.3);
+
+  --state-info: #3b82f6;         /* REGISTRADO, MOZO */
+  --state-info-bg: rgba(59, 130, 246, 0.12);
+  --state-info-border: rgba(59, 130, 246, 0.3);
+
+  /* Sombras y Luces */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.2);
+
+  /* Transiciones */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* Reset Básico */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar estilizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-primary);
+}
+
+/* Tipografía de Encabezados */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Botones Universales */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.btn-secondary {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-surface-hover);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-danger {
+  background: var(--state-danger-bg);
+  color: var(--state-danger);
+  border-color: var(--state-danger-border);
+}
+
+.btn-danger:hover {
+  background: var(--state-danger);
+  color: #ffffff;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Formularios Universales */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-family);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-primary-glow);
+  background-color: var(--bg-surface);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-error {
+  color: var(--state-danger);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Badges y Chips */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-success {
+  background: var(--state-success-bg);
+  color: var(--state-success);
+  border: 1px solid var(--state-success-border);
+}
+
+.badge-warning {
+  background: var(--state-warning-bg);
+  color: var(--state-warning);
+  border: 1px solid var(--state-warning-border);
+}
+
+.badge-danger {
+  background: var(--state-danger-bg);
+  color: var(--state-danger);
+  border: 1px solid var(--state-danger-border);
+}
+
+.badge-info {
+  background: var(--state-info-bg);
+  color: var(--state-info);
+  border: 1px solid var(--state-info-border);
+}
+
+/* Cards y Contenedores */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-medium);
+}
+
+/* Modales */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 23, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  max-width: 540px;
+  width: 100%;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Utilidades Flex & Grid */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.w-full { width: 100%; }
