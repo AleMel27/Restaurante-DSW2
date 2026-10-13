@@ -15,6 +15,7 @@
 .page-title {
   font-size: 1.75rem;
   color: #ffffff;
+  margin-bottom: 0.35rem;
 }
 
 .page-subtitle {
@@ -52,9 +53,52 @@
   color: var(--brand-primary);
 }
 
+/* Estilos de tabla alineados con el Dashboard */
 .table-card {
   padding: 0;
   overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.data-table th {
+  padding: 0.85rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.data-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.data-table tr:hover td {
+  background-color: var(--bg-surface-elevated);
+}
+
+.font-mono { 
+  font-family: monospace; 
+}
+
+.font-bold { 
+  font-weight: 700; 
+  color: #ffffff !important; 
 }
 
 .response-cell {

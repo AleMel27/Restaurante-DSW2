@@ -15,6 +15,7 @@
 .page-title {
   font-size: 1.75rem;
   color: #ffffff;
+  margin-bottom: 0.35rem;
 }
 
 .page-subtitle {
@@ -22,11 +23,75 @@
   font-size: 0.875rem;
 }
 
+/* Estilos de tabla heredados del Dashboard */
 .table-card {
   padding: 0;
   overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
 }
 
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.data-table th {
+  padding: 0.85rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.data-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.data-table tr:hover td {
+  background-color: var(--bg-surface-elevated);
+}
+
+.font-mono { 
+  font-family: monospace; 
+}
+
+.font-bold { 
+  font-weight: 700; 
+  color: #ffffff !important; 
+}
+
+.table-badge {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Formularios y Modales */
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -59,4 +124,11 @@
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: var(--state-danger);
+  margin-top: 0.25rem;
+  display: block;
 }
