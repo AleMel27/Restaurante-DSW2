@@ -14,13 +14,13 @@
     </div>
     <div class="welcome-actions">
       @if (authService.hasRole(['ADMIN', 'MOZO'])) {
-        <a routerLink="/pedidos" class="btn btn-primary">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Nuevo Pedido
-        </a>
+      <a routerLink="/pedidos" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nuevo Pedido
+      </a>
       }
       <a routerLink="/mesas" class="btn btn-secondary">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -76,7 +76,8 @@
       </div>
     </div>
 
-    <!-- Métricas Atenciones -->
+    <!-- Métricas Atenciones (Solo ADMIN) -->
+    @if (authService.hasRole(['ADMIN'])) {
     <div class="metric-card">
       <div class="metric-icon-box green-glow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -95,8 +96,10 @@
         </div>
       </div>
     </div>
+    }
 
-    <!-- Métricas Reclamos -->
+    <!-- Métricas Reclamos (Solo ADMIN) -->
+    @if (authService.hasRole(['ADMIN'])) {
     <div class="metric-card">
       <div class="metric-icon-box rose-glow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -118,6 +121,28 @@
         </div>
       </div>
     </div>
+    }
+
+    <!-- Métricas Consultas -->
+    @if (authService.hasRole(['ADMIN'])) {
+    <div class="metric-card">
+      <div class="metric-icon-box purple-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-label">Consultas Recibidas</span>
+        <div class="metric-value">
+          <span class="number text-purple">{{ totalConsultas() }}</span>
+          <span class="total-denom">registradas</span>
+        </div>
+        <div class="metric-foot">
+          <span class="badge badge-info">Atención al cliente</span>
+        </div>
+      </div>
+    </div>
+    }
   </div>
 
   <!-- SECCIÓN DE PEDIDOS RECIENTES -->
@@ -131,56 +156,56 @@
     </div>
 
     @if (pedidosActivos().length === 0) {
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <p>No hay pedidos registrados en este momento.</p>
-        @if (authService.hasRole(['ADMIN', 'MOZO'])) {
-          <a routerLink="/pedidos" class="btn btn-primary btn-sm">Crear Primer Pedido</a>
-        }
-      </div>
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>No hay pedidos registrados en este momento.</p>
+      @if (authService.hasRole(['ADMIN', 'MOZO'])) {
+      <a routerLink="/pedidos" class="btn btn-primary btn-sm">Crear Primer Pedido</a>
+      }
+    </div>
     } @else {
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Mesa</th>
-              <th>Cliente</th>
-              <th>Mozo</th>
-              <th>Platos Solicitados</th>
-              <th>Estado</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (pedido of pedidosActivos(); track pedido.idPedido) {
-              <tr>
-                <td class="font-mono">#{{ pedido.idPedido }}</td>
-                <td>
-                  <span class="table-badge">Mesa {{ pedido.NumeroMesa }}</span>
-                </td>
-                <td>{{ pedido.nombreCliente }} {{ pedido.apellidoCliente }}</td>
-                <td>{{ pedido.nombreMozo }} {{ pedido.apellidoMozo }}</td>
-                <td>
-                  <div class="dish-tags">
-                    @for (det of pedido.detalles; track det.idPlato) {
-                      <span class="dish-tag">{{ det.cantidad }}x {{ det.nombrePlato }}</span>
-                    }
-                  </div>
-                </td>
-                <td>
-                  <span class="badge badge-info">{{ pedido.estado }}</span>
-                </td>
-                <td class="font-bold">S/ {{ pedido.total | number:'1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mesa</th>
+            <th>Cliente</th>
+            <th>Mozo</th>
+            <th>Platos Solicitados</th>
+            <th>Estado</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pedido of pedidosActivos(); track pedido.idPedido) {
+          <tr>
+            <td class="font-mono">#{{ pedido.idPedido }}</td>
+            <td>
+              <span class="table-badge">Mesa {{ pedido.NumeroMesa }}</span>
+            </td>
+            <td>{{ pedido.nombreCliente }} {{ pedido.apellidoCliente }}</td>
+            <td>{{ pedido.nombreMozo }} {{ pedido.apellidoMozo }}</td>
+            <td>
+              <div class="dish-tags">
+                @for (det of pedido.detalles; track det.idPlato) {
+                <span class="dish-tag">{{ det.cantidad }}x {{ det.nombrePlato }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-info">{{ pedido.estado }}</span>
+            </td>
+            <td class="font-bold">S/ {{ pedido.total | number:'1.2-2' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
     }
   </div>
 </div>

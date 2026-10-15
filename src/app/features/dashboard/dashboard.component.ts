@@ -36,6 +36,7 @@ export class DashboardComponent implements OnInit {
 
   totalAtenciones = signal<number>(0);
   totalReclamosAbiertos = signal<number>(0);
+  totalConsultas = signal<number>(0);
 
   isLoading = signal<boolean>(true);
 
@@ -51,9 +52,10 @@ export class DashboardComponent implements OnInit {
       mesas: this.mesaService.listar().pipe(catchError(() => of([]))),
       pedidos: this.pedidoService.listarPedidos().pipe(catchError(() => of([]))),
       atenciones: this.atencionService.listarAtenciones().pipe(catchError(() => of([]))),
-      reclamos: this.atencionService.listarReclamos().pipe(catchError(() => of([])))
+      reclamos: this.atencionService.listarReclamos().pipe(catchError(() => of([]))),
+      consultas: this.atencionService.listarConsultas().pipe(catchError(() => of([])))
     }).subscribe({
-      next: ({ mesas, pedidos, atenciones, reclamos }) => {
+      next: ({ mesas, pedidos, atenciones, reclamos, consultas }) => {
         // Métricas de Mesas
         if (mesas && Array.isArray(mesas)) {
           this.totalMesas.set(mesas.length);
@@ -69,12 +71,15 @@ export class DashboardComponent implements OnInit {
           this.montoTotal.set(total);
         }
 
-        // Métricas de Atenciones y Reclamos
+        // Métricas de Atenciones, Reclamos y Consultas
         if (atenciones && Array.isArray(atenciones)) {
           this.totalAtenciones.set(atenciones.filter(a => a.estado === 'PENDIENTE' || a.estado === 'EN_ATENCION').length);
         }
         if (reclamos && Array.isArray(reclamos)) {
           this.totalReclamosAbiertos.set(reclamos.filter(r => r.estado === 'ABIERTO' || r.estado === 'EN_REVISION').length);
+        }
+        if (consultas && Array.isArray(consultas)) {
+          this.totalConsultas.set(consultas.length);
         }
 
         this.isLoading.set(false);
