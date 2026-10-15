@@ -22,24 +22,44 @@ export class PlatosListComponent implements OnInit {
   showModal = signal<boolean>(false);
   editandoId = signal<number | null>(null);
 
+  // --- VARIABLES DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  elementosPorPagina = 9;
+
+  // Getter que filtra por rol/disponibilidad y aplica la paginación
+  get platosPaginados(): Plato[] {
+    const lista = this.platos();
+    const esAdmin = this.authService.hasRole(['ADMIN']);
+    
+    // Filtro previo según permisos de rol
+    const filtrados = esAdmin ? lista : lista.filter(p => p.disponible);
+    
+    // Corte por página de 10 en 10
+    const inicio = (this.paginaActual() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return filtrados.slice(inicio, fin);
+  }
+
+  // Getter para calcular el total de páginas según el filtro actual
+  get totalPaginas(): number {
+    const lista = this.platos();
+    const esAdmin = this.authService.hasRole(['ADMIN']);
+    const filtrados = esAdmin ? lista : lista.filter(p => p.disponible);
+    return Math.ceil(filtrados.length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual.set(pagina);
+    }
+  }
+
   platoForm: FormGroup = this.fb.group({
     nombre: ['', Validators.required],
     descripcion: [''],
     precio: [null, [Validators.required, Validators.min(0.1)]],
     disponible: [true, Validators.required]
   });
-
-  // Getter que filtra los platos según el rol
-  get platosVisibles(): Plato[] {
-    const lista = this.platos();
-    const esAdmin = this.authService.hasRole(['ADMIN']);
-    
-    if (esAdmin) {
-      return lista; // El admin ve todo (disponibles y agotados)
-    }
-    // Si no es admin, solo ve los que tienen disponible = true
-    return lista.filter(p => p.disponible);
-  }
 
   ngOnInit(): void {
     this.cargarPlatos();
@@ -50,6 +70,7 @@ export class PlatosListComponent implements OnInit {
     this.pedidoService.listarPlatos().subscribe({
       next: (data) => {
         this.platos.set(data || []);
+        this.paginaActual.set(1); // Reiniciar a la primera página al refrescar
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

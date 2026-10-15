@@ -19,6 +19,28 @@ export class ClientesListComponent implements OnInit {
   isLoading = signal<boolean>(true);
   showModal = signal<boolean>(false);
 
+  // --- VARIABLES DE PAGINACIÓN ---
+  paginaActual = signal<number>(1);
+  elementosPorPagina = 10;
+
+  // Getter para obtener solo los clientes de la página actual
+  get clientesPaginados(): Cliente[] {
+    const inicio = (this.paginaActual() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return this.clientes().slice(inicio, fin);
+  }
+
+  // Getter para calcular el número total de páginas
+  get totalPaginas(): number {
+    return Math.ceil(this.clientes().length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual.set(pagina);
+    }
+  }
+
   clienteForm: FormGroup = this.fb.group({
     nombres: ['', Validators.required],
     apellidos: ['', Validators.required],
@@ -36,6 +58,7 @@ export class ClientesListComponent implements OnInit {
     this.pedidoService.listarClientes().subscribe({
       next: (data) => {
         this.clientes.set(data || []);
+        this.paginaActual.set(1); // Reiniciar a la primera página al cargar
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

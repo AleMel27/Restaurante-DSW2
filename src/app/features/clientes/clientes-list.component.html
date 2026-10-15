@@ -1,8 +1,8 @@
 <div class="clientes-page">
   <div class="page-header">
     <div class="header-info">
-      <h1 class="page-title">Gestión de Clientes</h1>
-      <p class="page-subtitle">Padrón de clientes registrados para comandas (`pedidos-service` :8082)</p>
+      <h1 class="page-title">Directorio de Clientes</h1>
+      <p class="page-subtitle">Gestión de comensales registrados en el sistema</p>
     </div>
 
     <button class="btn btn-primary" (click)="abrirCrear()">
@@ -17,34 +17,67 @@
   @if (isLoading()) {
     <div class="loading-state">
       <div class="spinner"></div>
-      <p>Consultando clientes...</p>
+      <p>Cargando lista de clientes...</p>
     </div>
   } @else {
-    <div class="card table-card">
+    <div class="table-card">
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Cliente</th>
+              <th>Nombres y Apellidos</th>
               <th>DNI</th>
               <th>Teléfono</th>
-              <th>Correo</th>
+              <th>Correo Electrónico</th>
             </tr>
           </thead>
           <tbody>
-            @for (c of clientes(); track c.idcliente) {
+            <!-- Iteramos sobre clientesPaginados en lugar de clientes() -->
+            @for (cliente of clientesPaginados; track cliente.idcliente) {
               <tr>
-                <td class="font-mono">#{{ c.idcliente }}</td>
-                <td class="font-bold">{{ c.nombres }} {{ c.apellidos }}</td>
-                <td><span class="table-badge">{{ c.dni }}</span></td>
-                <td>{{ c.telefono }}</td>
-                <td>{{ c.correo }}</td>
+                <td class="font-mono">#{{ cliente.idcliente }}</td>
+                <td class="font-bold">{{ cliente.nombres }} {{ cliente.apellidos }}</td>
+                <td><span class="table-badge">{{ cliente.dni }}</span></td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.correo }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <p>No hay clientes registrados en este momento.</p>
+                  </div>
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <!-- CONTROLES DE PAGINACIÓN -->
+      @if (clientes().length > 0) {
+        <div class="pagination-container">
+          <span class="pagination-info">
+            Mostrando página <strong>{{ paginaActual() }}</strong> de <strong>{{ totalPaginas }}</strong> 
+            (Total: {{ clientes().length }} clientes)
+          </span>
+          <div class="pagination-buttons">
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActual() === 1" 
+              (click)="cambiarPagina(paginaActual() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActual() === totalPaginas" 
+              (click)="cambiarPagina(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
     </div>
   }
 
@@ -61,36 +94,33 @@
           <div class="form-row-2">
             <div class="form-group">
               <label class="form-label">Nombres</label>
-              <input type="text" class="form-control" formControlName="nombres" />
+              <input type="text" class="form-control" formControlName="nombres" placeholder="Ej. Juan Carlos" />
             </div>
             <div class="form-group">
               <label class="form-label">Apellidos</label>
-              <input type="text" class="form-control" formControlName="apellidos" />
+              <input type="text" class="form-control" formControlName="apellidos" placeholder="Ej. Pérez Gómez" />
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">DNI (8 dígitos numéricos)</label>
-            <input type="text" class="form-control" formControlName="dni" maxlength="8" />
-            @if (clienteForm.get('dni')?.invalid && clienteForm.get('dni')?.touched) {
-              <span class="form-error">Ingrese un DNI válido de 8 dígitos</span>
-            }
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input type="text" class="form-control" formControlName="telefono" />
+              <label class="form-label">DNI (8 dígitos)</label>
+              <input type="text" class="form-control" formControlName="dni" maxlength="8" placeholder="12345678" />
             </div>
             <div class="form-group">
-              <label class="form-label">Correo Electrónico</label>
-              <input type="email" class="form-control" formControlName="correo" />
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" formControlName="telefono" placeholder="987654321" />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-control" formControlName="correo" placeholder="correo@dominio.com" />
           </div>
 
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+            <button type="submit" class="btn btn-primary">Registrar Cliente</button>
           </div>
         </form>
       </div>
