@@ -23,6 +23,9 @@ export class UsuarioService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  activar(id: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/activar`, {});
+  }
   buscarMozo(id: number): Observable<UsuarioResponse> {
     return this.http.get<UsuarioResponse>(`${this.baseUrl}/mozos/${id}`);
   }

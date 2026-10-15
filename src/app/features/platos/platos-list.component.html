@@ -5,81 +5,107 @@
       <p class="page-subtitle">Productos activos para pedidos de salón (`pedidos-service` :8082)</p>
     </div>
 
-    @if (authService.hasRole(['ADMIN', 'CHEF'])) {
-      <button class="btn btn-primary" (click)="abrirCrear()">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        Registrar Nuevo Plato
-      </button>
+    <!-- Restringido exclusivamente para ADMIN -->
+    @if (authService.hasRole(['ADMIN'])) {
+    <button class="btn btn-primary" (click)="abrirCrear()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Registrar Nuevo Plato
+    </button>
     }
   </div>
 
   @if (isLoading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Cargando menú de platos...</p>
-    </div>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando menú de platos...</p>
+  </div>
   } @else {
-    <div class="platos-grid">
-      @for (plato of platos(); track plato.idPlato) {
-        <div class="plato-card card">
-          <div class="plato-header">
-            <span class="plato-id">#{{ plato.idPlato }}</span>
-            <span class="badge" [ngClass]="plato.disponible ? 'badge-success' : 'badge-danger'">
-              {{ plato.disponible ? 'DISPONIBLE' : 'AGOTADO' }}
-            </span>
-          </div>
+  <div class="platos-grid">
+    <!-- Cambiamos platos() por el getter filtrado platosVisibles -->
+    @for (plato of platosVisibles; track plato.idPlato) {
+    <div class="plato-card card">
+      <div class="plato-header">
+        <span class="plato-id">#{{ plato.idPlato }}</span>
+        <span class="badge" [ngClass]="plato.disponible ? 'badge-success' : 'badge-danger'">
+          {{ plato.disponible ? 'DISPONIBLE' : 'AGOTADO' }}
+        </span>
+      </div>
 
-          <div class="plato-info">
-            <h3 class="plato-name">{{ plato.nombre }}</h3>
-            <p class="plato-desc">{{ plato.descripcion || 'Especialidad de la casa preparada al momento.' }}</p>
-          </div>
+      <div class="plato-info">
+        <h3 class="plato-name">{{ plato.nombre }}</h3>
+        <p class="plato-desc">{{ plato.descripcion || 'Especialidad de la casa preparada al momento.' }}</p>
+      </div>
 
-          <div class="plato-footer">
-            <span class="price-label">Precio:</span>
-            <span class="plato-price">S/ {{ plato.precio | number:'1.2-2' }}</span>
-          </div>
+      <div class="plato-footer">
+        <div class="price-container">
+          <span class="price-label">Precio:</span>
+          <span class="plato-price">S/ {{ plato.precio | number:'1.2-2' }}</span>
         </div>
-      }
+
+        @if (authService.hasRole(['ADMIN'])) {
+        <button class="btn btn-secondary btn-sm" (click)="abrirEditar(plato)">
+          Editar
+        </button>
+        }
+      </div>
     </div>
+    }
+  </div>
   }
 
-  <!-- MODAL NUEVO PLATO -->
+  <!-- MODAL NUEVO / EDITAR PLATO -->
   @if (showModal()) {
-    <div class="modal-backdrop" (click)="cerrarModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2 class="modal-title">Agregar Nuevo Plato a la Carta</h2>
-          <button class="close-btn" (click)="cerrarModal()">&times;</button>
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          {{ editandoId() ? 'Editar Plato #' + editandoId() : 'Agregar Nuevo Plato a la Carta' }}
+        </h2>
+        <button class="close-btn" (click)="cerrarModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="platoForm" (ngSubmit)="guardarPlato()">
+        <div class="form-group">
+          <label class="form-label">Nombre del Plato</label>
+          <input type="text" class="form-control" formControlName="nombre" placeholder="ej. Lomo Saltado Criollo" />
         </div>
 
-        <form [formGroup]="platoForm" (ngSubmit)="guardarPlato()">
-          <div class="form-group">
-            <label class="form-label">Nombre del Plato</label>
-            <input type="text" class="form-control" formControlName="nombre" placeholder="ej. Lomo Saltado Criollo" />
-          </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" formControlName="descripcion" rows="3"
+            placeholder="Ingredientes y presentación..."></textarea>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">Descripción</label>
-            <textarea class="form-control" formControlName="descripcion" rows="3" placeholder="Ingredientes y presentación..."></textarea>
-          </div>
-
+        <div class="form-row-2">
           <div class="form-group">
             <label class="form-label">Precio (S/)</label>
             <input type="number" step="0.5" class="form-control" formControlName="precio" placeholder="0.00" />
-            @if (platoForm.get('precio')?.invalid && platoForm.get('precio')?.touched) {
-              <span class="form-error">El precio debe ser mayor a 0</span>
-            }
           </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Registrar Plato</button>
+          <div class="form-group">
+            <label class="form-label">Estado de Disponibilidad</label>
+            <select class="form-control" formControlName="disponible">
+              <option [ngValue]="true">DISPONIBLE</option>
+              <option [ngValue]="false">AGOTADO</option>
+            </select>
           </div>
-        </form>
-      </div>
+        </div>
+
+        @if (platoForm.get('precio')?.invalid && platoForm.get('precio')?.touched) {
+        <span class="form-error">El precio debe ser mayor a 0</span>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            {{ editandoId() ? 'Guardar Cambios' : 'Registrar Plato' }}
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
   }
 </div>

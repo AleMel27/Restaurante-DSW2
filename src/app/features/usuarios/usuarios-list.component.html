@@ -15,111 +15,117 @@
   </div>
 
   @if (isLoading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Consultando colaboradores...</p>
-    </div>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Consultando colaboradores...</p>
+  </div>
   } @else {
-    <div class="card table-card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Colaborador</th>
-              <th>Correo</th>
-              <th>Teléfono</th>
-              <th>Rol Asignado</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (u of usuarios(); track u.idUsuario) {
-              <tr>
-                <td class="font-mono">#{{ u.idUsuario }}</td>
-                <td class="font-bold">{{ u.nombres }} {{ u.apellidos }}</td>
-                <td>{{ u.correo }}</td>
-                <td>{{ u.telefono }}</td>
-                <td>
-                  <span class="badge" [ngClass]="{
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Colaborador</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Rol Asignado</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios(); track u.idUsuario) {
+          <tr>
+            <td class="font-mono">#{{ u.idUsuario }}</td>
+            <td class="font-bold">{{ u.nombres }} {{ u.apellidos }}</td>
+            <td>{{ u.correo }}</td>
+            <td>{{ u.telefono }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
                     'badge-danger': u.rol === 'ADMIN',
                     'badge-info': u.rol === 'MOZO',
                     'badge-success': u.rol === 'CHEF'
                   }">
-                    {{ u.rol }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge" [ngClass]="u.activo ? 'badge-success' : 'badge-danger'">
-                    {{ u.activo ? 'ACTIVO' : 'INACTIVO' }}
-                  </span>
-                </td>
-                <td>
-                  <button class="btn btn-danger btn-sm" (click)="eliminarUsuario(u)">
-                    Dar de Baja
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+                {{ u.rol }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="u.activo ? 'badge-success' : 'badge-danger'">
+                {{ u.activo ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+            </td>
+            <td>
+              @if (u.activo) {
+              <button class="btn btn-danger btn-sm" (click)="eliminarUsuario(u)">
+                Dar de Baja
+              </button>
+              } @else {
+              <button class="btn btn-success btn-sm" (click)="activarUsuario(u)">
+                Activar
+              </button>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
     </div>
+  </div>
   }
 
   <!-- MODAL REGISTRO DE USUARIO -->
   @if (showModal()) {
-    <div class="modal-backdrop" (click)="cerrarModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2 class="modal-title">Registrar Nuevo Colaborador</h2>
-          <button class="close-btn" (click)="cerrarModal()">&times;</button>
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Registrar Nuevo Colaborador</h2>
+        <button class="close-btn" (click)="cerrarModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="guardarUsuario()">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Nombres</label>
+            <input type="text" class="form-control" formControlName="nombres" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apellidos</label>
+            <input type="text" class="form-control" formControlName="apellidos" />
+          </div>
         </div>
 
-        <form [formGroup]="userForm" (ngSubmit)="guardarUsuario()">
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Nombres</label>
-              <input type="text" class="form-control" formControlName="nombres" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Apellidos</label>
-              <input type="text" class="form-control" formControlName="apellidos" />
-            </div>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico</label>
+          <input type="email" class="form-control" formControlName="correo" />
+        </div>
 
+        <div class="form-row-2">
           <div class="form-group">
-            <label class="form-label">Correo Electrónico</label>
-            <input type="email" class="form-control" formControlName="correo" />
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control" formControlName="password" />
           </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Contraseña</label>
-              <input type="password" class="form-control" formControlName="password" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input type="text" class="form-control" formControlName="telefono" />
-            </div>
-          </div>
-
           <div class="form-group">
-            <label class="form-label">Rol Operativo</label>
-            <select class="form-control" formControlName="rol">
-              <option value="ADMIN">ADMIN (Acceso Total)</option>
-              <option value="MOZO">MOZO (Atención y Pedidos)</option>
-              <option value="CHEF">CHEF (Cocina y Platos)</option>
-            </select>
+            <label class="form-label">Teléfono</label>
+            <input type="text" class="form-control" formControlName="telefono" />
           </div>
+        </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Registrar Usuario</button>
-          </div>
-        </form>
-      </div>
+        <div class="form-group">
+          <label class="form-label">Rol Operativo</label>
+          <select class="form-control" formControlName="rol">
+            <option value="ADMIN">ADMIN (Acceso Total)</option>
+            <option value="MOZO">MOZO (Atención y Pedidos)</option>
+            <option value="CHEF">CHEF (Cocina y Platos)</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+        </div>
+      </form>
     </div>
+  </div>
   }
 </div>

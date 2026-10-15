@@ -78,4 +78,12 @@ export class UsuariosListComponent implements OnInit {
       });
     }
   }
+  activarUsuario(u: UsuarioResponse): void {
+    if (confirm(`¿Confirma activar nuevamente al usuario ${u.nombres} ${u.apellidos}?`)) {
+      this.usuarioService.activar(u.idUsuario).subscribe({
+        next: () => this.cargarUsuarios(),
+        error: () => alert('Error al activar el usuario.')
+      });
+    }
+  }
 }

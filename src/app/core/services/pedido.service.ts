@@ -37,6 +37,11 @@ export class PedidoService {
     return this.http.post<Plato>(`${this.api}/platos`, plato);
   }
 
+  // NUEVO: Método para actualizar el plato existente
+  actualizarPlato(id: number, plato: Plato): Observable<Plato> {
+    return this.http.put<Plato>(`${this.api}/platos/${id}`, plato);
+  }
+
   // Pedidos
   listarPedidos(): Observable<PedidoResponse[]> {
     return this.http.get<PedidoResponse[]>(`${this.api}/pedidos`);
