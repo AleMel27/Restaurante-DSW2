@@ -22,6 +22,45 @@ export class ConsultasReclamosComponent implements OnInit {
   reclamos = signal<Reclamo[]>([]);
   isLoading = signal<boolean>(true);
 
+  // --- VARIABLES DE PAGINACIÓN (10 elementos) ---
+  elementosPorPagina = 10;
+  paginaActualReclamos = signal<number>(1);
+  paginaActualConsultas = signal<number>(1);
+
+  // Getters de paginación para Reclamos
+  get reclamosPaginados(): Reclamo[] {
+    const inicio = (this.paginaActualReclamos() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return this.reclamos().slice(inicio, fin);
+  }
+
+  get totalPaginasReclamos(): number {
+    return Math.ceil(this.reclamos().length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarPaginaReclamos(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginasReclamos) {
+      this.paginaActualReclamos.set(pagina);
+    }
+  }
+
+  // Getters de paginación para Consultas
+  get consultasPaginadas(): Consulta[] {
+    const inicio = (this.paginaActualConsultas() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return this.consultas().slice(inicio, fin);
+  }
+
+  get totalPaginasConsultas(): number {
+    return Math.ceil(this.consultas().length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarPaginaConsultas(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginasConsultas) {
+      this.paginaActualConsultas.set(pagina);
+    }
+  }
+
   // Modal para responder
   showModal = signal<boolean>(false);
   modalTipo = signal<'CONSULTA' | 'RECLAMO'>('RECLAMO');
@@ -44,6 +83,8 @@ export class ConsultasReclamosComponent implements OnInit {
       next: ({ consultas, reclamos }) => {
         this.consultas.set(consultas || []);
         this.reclamos.set(reclamos || []);
+        this.paginaActualReclamos.set(1);
+        this.paginaActualConsultas.set(1);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

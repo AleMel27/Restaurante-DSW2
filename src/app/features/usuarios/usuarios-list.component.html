@@ -35,7 +35,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (u of usuarios(); track u.idUsuario) {
+          @for (u of usuariosPaginados; track u.idUsuario) {
           <tr>
             <td class="font-mono">#{{ u.idUsuario }}</td>
             <td class="font-bold">{{ u.nombres }} {{ u.apellidos }}</td>
@@ -71,6 +71,25 @@
         </tbody>
       </table>
     </div>
+
+    <!-- CONTROLES DE PAGINACIÓN -->
+    @if (usuarios().length > 0) {
+    <div class="pagination-container">
+      <span class="pagination-info">
+        Mostrando página <strong>{{ paginaActual() }}</strong> de <strong>{{ totalPaginas }}</strong>
+        (Total: {{ usuarios().length }} colaboradores)
+      </span>
+      <div class="pagination-buttons">
+        <button class="pagination-btn" [disabled]="paginaActual() === 1" (click)="cambiarPagina(paginaActual() - 1)">
+          Anterior
+        </button>
+        <button class="pagination-btn" [disabled]="paginaActual() === totalPaginas"
+          (click)="cambiarPagina(paginaActual() + 1)">
+          Siguiente
+        </button>
+      </div>
+    </div>
+    }
   </div>
   }
 
@@ -125,6 +144,45 @@
           <button type="submit" class="btn btn-primary">Registrar Usuario</button>
         </div>
       </form>
+    </div>
+  </div>
+  }
+
+  <!-- MODAL DE CONFIRMACIÓN ESTILIZADO -->
+  @if (showConfirmModal() && usuarioSeleccionado()) {
+  <div class="modal-backdrop" (click)="cerrarConfirmModal()">
+    <div class="modal-content confirm-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          {{ accionTipo() === 'BAJA' ? ' Confirmar Baja de Colaborador' : ' Confirmar Activación' }}
+        </h2>
+        <button class="close-btn" (click)="cerrarConfirmModal()">&times;</button>
+      </div>
+
+      <div class="confirm-body">
+        <p class="confirm-text">
+          ¿Estás seguro de que deseas
+          <span class="action-highlight" [class.text-danger-custom]="accionTipo() === 'BAJA'"
+            [class.text-success-custom]="accionTipo() === 'ACTIVAR'">
+            {{ accionTipo() === 'BAJA' ? 'dar de baja' : 'activar' }}
+          </span>
+          al colaborador <strong class="user-target">{{ usuarioSeleccionado()?.nombres }} {{
+            usuarioSeleccionado()?.apellidos }}</strong>?
+        </p>
+        <p class="confirm-subtext">
+          {{ accionTipo() === 'BAJA'
+          ? 'El usuario perderá el acceso operativo al sistema hasta que sea activado nuevamente.'
+          : 'El usuario recuperará su acceso operativo al sistema de inmediato.' }}
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarConfirmModal()">Cancelar</button>
+        <button type="button" class="btn" [ngClass]="accionTipo() === 'BAJA' ? 'btn-danger' : 'btn-success'"
+          (click)="ejecutarAccionUsuario()">
+          {{ accionTipo() === 'BAJA' ? 'Sí, Dar de Baja' : 'Sí, Activar' }}
+        </button>
+      </div>
     </div>
   </div>
   }

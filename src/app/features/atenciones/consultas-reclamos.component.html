@@ -39,7 +39,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (r of reclamos(); track r.idReclamo) {
+            @for (r of reclamosPaginados; track r.idReclamo) {
               <tr>
                 <td class="font-mono">#{{ r.idReclamo }}</td>
                 <td>Cliente #{{ r.idCliente }}</td>
@@ -70,10 +70,42 @@
                   </button>
                 </td>
               </tr>
+            } @empty {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <p>No hay reclamos registrados.</p>
+                  </div>
+                </td>
+              </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <!-- PAGINACIÓN RECLAMOS -->
+      @if (reclamos().length > 0) {
+        <div class="pagination-container">
+          <span class="pagination-info">
+            Mostrando página <strong>{{ paginaActualReclamos() }}</strong> de <strong>{{ totalPaginasReclamos }}</strong> 
+            (Total: {{ reclamos().length }} reclamos)
+          </span>
+          <div class="pagination-buttons">
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActualReclamos() === 1" 
+              (click)="cambiarPaginaReclamos(paginaActualReclamos() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActualReclamos() === totalPaginasReclamos" 
+              (click)="cambiarPaginaReclamos(paginaActualReclamos() + 1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
     </div>
   } @else {
     <!-- TABLA DE CONSULTAS -->
@@ -92,7 +124,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (c of consultas(); track c.idConsulta) {
+            @for (c of consultasPaginadas; track c.idConsulta) {
               <tr>
                 <td class="font-mono">#{{ c.idConsulta }}</td>
                 <td>Cliente #{{ c.idCliente }}</td>
@@ -113,10 +145,42 @@
                   </button>
                 </td>
               </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <p>No hay consultas registradas.</p>
+                  </div>
+                </td>
+              </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <!-- PAGINACIÓN CONSULTAS -->
+      @if (consultas().length > 0) {
+        <div class="pagination-container">
+          <span class="pagination-info">
+            Mostrando página <strong>{{ paginaActualConsultas() }}</strong> de <strong>{{ totalPaginasConsultas }}</strong> 
+            (Total: {{ consultas().length }} consultas)
+          </span>
+          <div class="pagination-buttons">
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActualConsultas() === 1" 
+              (click)="cambiarPaginaConsultas(paginaActualConsultas() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActualConsultas() === totalPaginasConsultas" 
+              (click)="cambiarPaginaConsultas(paginaActualConsultas() + 1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
     </div>
   }
 

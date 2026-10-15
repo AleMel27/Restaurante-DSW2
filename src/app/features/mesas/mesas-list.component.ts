@@ -22,7 +22,15 @@ export class MesasListComponent implements OnInit {
   isLoading = signal<boolean>(true);
   errorMsg = signal<string | null>(null);
 
-  // Modal State
+  // Variables de paginación
+  paginaActual = signal<number>(1);
+  elementosPorPagina = 9;
+
+  // --- ESTADOS PARA EL MODAL DE CONFIRMACIÓN ESTILIZADO ---
+  showConfirmModal = signal<boolean>(false);
+  mesaSeleccionada = signal<Mesa | null>(null);
+
+  // Modal State (Crear / Editar)
   showModal = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   editingId = signal<number | null>(null);
@@ -43,6 +51,7 @@ export class MesasListComponent implements OnInit {
     this.mesaService.listar().subscribe({
       next: (data) => {
         this.mesas.set(data || []);
+        this.paginaActual.set(1);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -58,6 +67,28 @@ export class MesasListComponent implements OnInit {
       return this.mesas();
     }
     return this.mesas().filter(m => m.estado === filtro);
+  }
+
+  get mesasPaginadas(): Mesa[] {
+    const filtradas = this.mesasFiltradas;
+    const inicio = (this.paginaActual() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return filtradas.slice(inicio, fin);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.mesasFiltradas.length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarFiltro(estado: string): void {
+    this.filtroEstado.set(estado);
+    this.paginaActual.set(1);
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual.set(pagina);
+    }
   }
 
   abrirCrear(): void {
@@ -117,13 +148,28 @@ export class MesasListComponent implements OnInit {
     }
   }
 
+  // --- MÉTODOS PARA EL MODAL DE CONFIRMACIÓN ---
   eliminarMesa(mesa: Mesa): void {
     if (!mesa.idMesa) return;
-    if (confirm(`¿Confirma dar de baja lógica a la Mesa #${mesa.numero}?`)) {
-      this.mesaService.eliminar(mesa.idMesa).subscribe({
-        next: () => this.cargarMesas(),
-        error: (err) => alert('Error al eliminar la mesa.')
-      });
-    }
+    this.mesaSeleccionada.set(mesa);
+    this.showConfirmModal.set(true);
+  }
+
+  cerrarConfirmModal(): void {
+    this.showConfirmModal.set(false);
+    this.mesaSeleccionada.set(null);
+  }
+
+  ejecutarEliminacion(): void {
+    const mesa = this.mesaSeleccionada();
+    if (!mesa || !mesa.idMesa) return;
+
+    this.mesaService.eliminar(mesa.idMesa).subscribe({
+      next: () => {
+        this.cerrarConfirmModal();
+        this.cargarMesas();
+      },
+      error: (err) => alert('Error al dar de baja la mesa: ' + (err.error?.message || err.message))
+    });
   }
 }

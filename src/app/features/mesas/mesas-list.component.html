@@ -19,19 +19,19 @@
   <!-- Barra de Filtros -->
   <div class="filter-bar">
     <div class="filter-tabs">
-      <button class="filter-tab" [class.active]="filtroEstado() === 'TODAS'" (click)="filtroEstado.set('TODAS')">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'TODAS'" (click)="cambiarFiltro('TODAS')">
         Todas ({{ mesas().length }})
       </button>
-      <button class="filter-tab" [class.active]="filtroEstado() === 'DISPONIBLE'" (click)="filtroEstado.set('DISPONIBLE')">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'DISPONIBLE'" (click)="cambiarFiltro('DISPONIBLE')">
         <span class="tab-dot dot-success"></span> Disponibles
       </button>
-      <button class="filter-tab" [class.active]="filtroEstado() === 'OCUPADA'" (click)="filtroEstado.set('OCUPADA')">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'OCUPADA'" (click)="cambiarFiltro('OCUPADA')">
         <span class="tab-dot dot-danger"></span> Ocupadas
       </button>
-      <button class="filter-tab" [class.active]="filtroEstado() === 'RESERVADA'" (click)="filtroEstado.set('RESERVADA')">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'RESERVADA'" (click)="cambiarFiltro('RESERVADA')">
         <span class="tab-dot dot-warning"></span> Reservadas
       </button>
-      <button class="filter-tab" [class.active]="filtroEstado() === 'MANTENIMIENTO'" (click)="filtroEstado.set('MANTENIMIENTO')">
+      <button class="filter-tab" [class.active]="filtroEstado() === 'MANTENIMIENTO'" (click)="cambiarFiltro('MANTENIMIENTO')">
         <span class="tab-dot dot-muted"></span> Mantenimiento
       </button>
     </div>
@@ -49,7 +49,7 @@
     </div>
   } @else {
     <div class="mesas-grid">
-      @for (mesa of mesasFiltradas; track mesa.idMesa) {
+      @for (mesa of mesasPaginadas; track mesa.idMesa) {
         <div class="mesa-card" [ngClass]="'status-' + mesa.estado.toLowerCase()">
           <div class="mesa-card-header">
             <span class="mesa-number">MESA {{ mesa.numero }}</span>
@@ -97,6 +97,30 @@
         </div>
       }
     </div>
+
+    <!-- CONTROLES DE PAGINACIÓN -->
+    @if (mesasFiltradas.length > 0) {
+      <div class="pagination-container">
+        <span class="pagination-info">
+          Mostrando página <strong>{{ paginaActual() }}</strong> de <strong>{{ totalPaginas }}</strong> 
+          (Total filtrado: {{ mesasFiltradas.length }} mesas)
+        </span>
+        <div class="pagination-buttons">
+          <button 
+            class="pagination-btn" 
+            [disabled]="paginaActual() === 1" 
+            (click)="cambiarPagina(paginaActual() - 1)">
+            Anterior
+          </button>
+          <button 
+            class="pagination-btn" 
+            [disabled]="paginaActual() === totalPaginas" 
+            (click)="cambiarPagina(paginaActual() + 1)">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
   }
 
   <!-- MODAL CREAR / EDITAR MESA (SOLO ADMIN) -->
@@ -144,6 +168,34 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE CONFIRMACIÓN ESTILIZADO -->
+  @if (showConfirmModal() && mesaSeleccionada()) {
+    <div class="modal-backdrop" (click)="cerrarConfirmModal()">
+      <div class="modal-content confirm-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Baja de Mesa</h2>
+          <button class="close-btn" (click)="cerrarConfirmModal()">&times;</button>
+        </div>
+
+        <div class="confirm-body">
+          <p class="confirm-text">
+            ¿Estás seguro de que deseas 
+            <span class="action-highlight text-danger-custom">dar de baja</span> 
+            la <strong class="user-target">Mesa #{{ mesaSeleccionada()?.numero }}</strong>?
+          </p>
+          <p class="confirm-subtext">
+            La mesa dejará de estar disponible y activa en el sistema de manera permanente.
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarConfirmModal()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="ejecutarEliminacion()">Sí, Dar de Baja</button>
+        </div>
       </div>
     </div>
   }

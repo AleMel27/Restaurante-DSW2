@@ -31,6 +31,28 @@ export class AtencionesListComponent implements OnInit {
   isLoading = signal<boolean>(true);
   showModal = signal<boolean>(false);
 
+  // --- VARIABLES DE PAGINACIÓN (10 elementos) ---
+  paginaActual = signal<number>(1);
+  elementosPorPagina = 10;
+
+  // Getter para obtener solo las atenciones de la página actual
+  get atencionesPaginadas(): Atencion[] {
+    const inicio = (this.paginaActual() - 1) * this.elementosPorPagina;
+    const fin = inicio + this.elementosPorPagina;
+    return this.atenciones().slice(inicio, fin);
+  }
+
+  // Getter para calcular el número total de páginas
+  get totalPaginas(): number {
+    return Math.ceil(this.atenciones().length / this.elementosPorPagina) || 1;
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual.set(pagina);
+    }
+  }
+
   atencionForm: FormGroup = this.fb.group({
     idCliente: [null, Validators.required],
     idMesa: [null, Validators.required],
@@ -52,6 +74,7 @@ export class AtencionesListComponent implements OnInit {
         this.atenciones.set(atenciones || []);
         this.clientes.set(clientes || []);
         this.mesas.set(mesas || []);
+        this.paginaActual.set(1); // Reiniciar a la primera página
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)

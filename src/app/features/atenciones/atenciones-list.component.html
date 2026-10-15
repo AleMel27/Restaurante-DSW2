@@ -42,7 +42,8 @@
             </tr>
           </thead>
           <tbody>
-            @for (a of atenciones(); track a.idAtencion) {
+            <!-- Iteramos sobre atencionesPaginadas en bloques de 10 -->
+            @for (a of atencionesPaginadas; track a.idAtencion) {
               <tr>
                 <td class="font-mono">#{{ a.idAtencion }}</td>
                 <td><span class="table-badge">Mesa #{{ a.idMesa }}</span></td>
@@ -78,6 +79,30 @@
           </tbody>
         </table>
       </div>
+
+      <!-- CONTROLES DE PAGINACIÓN -->
+      @if (atenciones().length > 0) {
+        <div class="pagination-container">
+          <span class="pagination-info">
+            Mostrando página <strong>{{ paginaActual() }}</strong> de <strong>{{ totalPaginas }}</strong> 
+            (Total: {{ atenciones().length }} atenciones)
+          </span>
+          <div class="pagination-buttons">
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActual() === 1" 
+              (click)="cambiarPagina(paginaActual() - 1)">
+              Anterior
+            </button>
+            <button 
+              class="pagination-btn" 
+              [disabled]="paginaActual() === totalPaginas" 
+              (click)="cambiarPagina(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
     </div>
   }
 
