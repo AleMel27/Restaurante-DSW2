@@ -224,3 +224,14 @@
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-sm);
 }
+
+/* Estilos adicionales para la tarjeta de Reservas en el Dashboard */
+.purple-glow {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.text-purple {
+  color: #a855f7;
+}
