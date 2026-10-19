@@ -48,7 +48,6 @@ export class ReservasListComponent implements OnInit {
     mesas: this.mesaService.listar()
   }).subscribe({
     next: ({ reservas, mesas }) => {
-      console.log('Mesas recibidas del microservicio:', mesas); // Revisa esto en la consola (F12)
       this.reservas.set(reservas || []);
       this.mesas.set(mesas || []); // Quitamos temporalmente el .filter(m => m.activo) para probar
       this.isLoading.set(false);
