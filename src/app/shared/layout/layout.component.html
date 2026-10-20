@@ -84,7 +84,7 @@
         <span>Atenciones Salón</span>
       </a>
       }
-      
+
       <a routerLink="/chat" routerLinkActive="active" class="nav-item">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -172,14 +172,13 @@
     <header class="topbar">
       <div class="topbar-left">
         <div class="status-indicator">
-          <span class="status-ping"></span>
-          <span class="status-dot"></span>
-          <span class="status-text">Microservicios Online (8081 - 8085)</span>
         </div>
       </div>
 
       <div class="topbar-right">
         <div class="role-pill">
+          <span class="status-ping"></span>
+          <span class="status-dot"></span>
           <span>Modo:</span>
           <strong>{{ currentRole() }}</strong>
         </div>
