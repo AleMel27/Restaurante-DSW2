@@ -1,0 +1,59 @@
+<main class="chat-container">
+    <header class="chat-header">
+        <div class="brand">
+            <div>
+                <h1>RestoPro</h1>
+                <p>DSW2 MICROSERVICES</p>
+            </div>
+        </div>
+        <div class="connection">
+            <span class="status-dot"></span>
+            <span>Chat WebSocket</span>
+        </div>
+    </header>
+    <section class="chat-content">
+        <div class="welcome">
+            <h2>¡Bienvenido al Chat!</h2>
+            <p>
+                Panel de comunicación en tiempo real.
+                Envía mensajes y visualízalos en esta interfaz.
+            </p>
+        </div>
+        <div class="section-heading">
+            <h3>Mensajes del chat</h3>
+            <span class="message-count">EN VIVO</span>
+        </div>
+        <ul
+            id="messages"
+            class="messages-panel"
+            aria-live="polite"
+            aria-label="Mensajes recibidos">
+            <li *ngFor="let msg of messages">{{ msg }}</li>
+        </ul>
+        <form class="message-form" (ngSubmit)="send()">
+            <label for="message">Escribe tu mensaje</label>
+            <div class="input-row">
+                <input
+                    type="text"
+                    id="message"
+                    class="message-input"
+                    placeholder="Escribe algo aquí..."
+                    autocomplete="off"
+                    [(ngModel)]="messageText"
+                    name="messageText"
+                    required
+                >
+                <button type="submit" class="send-button">
+                    Enviar
+                </button>
+            </div>
+        </form>
+    </section>
+    <footer class="chat-footer">
+        <span>
+            <span class="footer-brand">RestoPro</span>
+            · Sistema de chat
+        </span>
+        <span>Comunicación en tiempo real</span>
+    </footer>
+</main>

@@ -1,0 +1,43 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { ChatService } from '../../core/services/chat.service';
+
+@Component({
+  selector: 'app-chat',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.css']
+})
+export class ChatComponent implements OnInit, OnDestroy {
+  messages: string[] = [];
+  messageText: string = '';
+  private chatSub!: Subscription;
+
+  constructor(private chatService: ChatService) {}
+
+  ngOnInit(): void {
+    const username = prompt('Ingresa tu nombre:') || 'Anónimo';
+    
+    this.chatService.connect(username);
+
+    this.chatSub = this.chatService.getMessages().subscribe((msg) => {
+      this.messages.push(msg);
+    });
+  }
+
+  send(): void {
+    if (this.messageText.trim() !== '') {
+      this.chatService.sendMessage(this.messageText);
+      this.messageText = '';
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.chatSub) {
+      this.chatSub.unsubscribe();
+    }
+  }
+}

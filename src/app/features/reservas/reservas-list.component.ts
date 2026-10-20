@@ -49,7 +49,7 @@ export class ReservasListComponent implements OnInit {
   }).subscribe({
     next: ({ reservas, mesas }) => {
       this.reservas.set(reservas || []);
-      this.mesas.set(mesas || []); // Quitamos temporalmente el .filter(m => m.activo) para probar
+      this.mesas.set(mesas || []);
       this.isLoading.set(false);
     },
     error: (err) => {

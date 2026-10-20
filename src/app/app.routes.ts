@@ -72,6 +72,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/reservas/reservas-list.component').then(m => m.ReservasListComponent),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'MOZO'] }
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'MOZO', 'CHEF'] }
       }
     ]
   },
