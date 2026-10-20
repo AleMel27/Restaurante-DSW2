@@ -1,0 +1,127 @@
+<div class="inventory-page">
+  <header class="page-header">
+    <div>
+      <h1>Gestión de Inventario</h1>
+      <p>Control de ingredientes, existencias y movimientos de almacén</p>
+    </div>
+  </header>
+
+  @if (aviso(); as mensaje) {
+    <div class="notice" [class.notice-error]="mensaje.tipo === 'error'" role="status">
+      {{ mensaje.texto }}
+      <button type="button" aria-label="Cerrar mensaje" (click)="aviso.set(null)">×</button>
+    </div>
+  }
+
+  <section class="summary-grid" aria-label="Resumen de inventario">
+    <div class="card metric"><span>Insumos registrados</span><strong>{{ cargandoInsumos() ? '…' : errorInsumos() ? '—' : insumos().length }}</strong></div>
+    <div class="card metric warning"><span>Stock bajo</span><strong>{{ cargandoInsumos() ? '…' : errorInsumos() ? '—' : totalBajo() }}</strong></div>
+    <div class="card metric danger"><span>Agotados</span><strong>{{ cargandoInsumos() ? '…' : errorInsumos() ? '—' : totalAgotado() }}</strong></div>
+    <div class="card metric"><span>Movimientos cargados</span><strong>{{ cargandoMovimientos() ? '…' : errorMovimientos() ? '—' : movimientos().length }}</strong></div>
+  </section>
+
+  <nav class="tabs" aria-label="Secciones de inventario">
+    <button type="button" [class.active]="pestana() === 'insumos'" (click)="pestana.set('insumos')">Insumos</button>
+    <button type="button" [class.active]="pestana() === 'movimientos'" (click)="pestana.set('movimientos')">Movimientos</button>
+    <button type="button" [class.active]="pestana() === 'recetas'" (click)="pestana.set('recetas')">Recetas</button>
+  </nav>
+
+  @if (pestana() === 'insumos') {
+    <section class="card section-card">
+      <div class="section-head"><div><h2>Insumos</h2><p>El stock se actualiza mediante movimientos.</p></div><button class="btn btn-primary" type="button" (click)="abrirInsumo()">+ Nuevo insumo</button></div>
+      <div class="filters">
+        <label class="sr-only" for="buscar-insumo">Buscar por nombre</label>
+        <input #buscarInput id="buscar-insumo" class="form-control" type="search" placeholder="Buscar insumo por nombre" [value]="busqueda()" (input)="busqueda.set(buscarInput.value)">
+        <label class="sr-only" for="estado-insumo">Filtrar por estado</label>
+        <select #estadoInput id="estado-insumo" class="form-control" [value]="filtroEstado()" (change)="cambiarEstado(estadoInput.value)">
+          <option value="TODOS">Todos los estados</option><option value="DISPONIBLE">Disponible</option><option value="BAJO">Stock bajo</option><option value="AGOTADO">Agotado</option>
+        </select>
+      </div>
+      @if (errorInsumos()) { <div class="notice notice-error" role="alert">{{ errorInsumos() }} <button type="button" (click)="cargarInsumos()">Reintentar</button></div> }
+      @else if (cargandoInsumos()) { <p class="state">Cargando insumos…</p> }
+      @else if (!insumosFiltrados().length) { <p class="state">No hay insumos para este filtro.</p> }
+      @else {
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Unidad</th><th>Stock actual</th><th>Stock mínimo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+          @for (insumo of insumosFiltrados(); track insumo.idInsumo) {
+            <tr><td><strong>{{ insumo.nombre }}</strong> @if (!insumo.activo) { <span class="muted">(Inactivo)</span> }</td><td>{{ insumo.unidadMedida }}</td><td>{{ insumo.stockActual | number:'1.0-3' }}</td><td>{{ insumo.stockMinimo | number:'1.0-3' }}</td><td><span class="badge" [class.badge-success]="estado(insumo) === 'DISPONIBLE'" [class.badge-warning]="estado(insumo) === 'BAJO'" [class.badge-danger]="estado(insumo) === 'AGOTADO'">{{ estado(insumo) === 'BAJO' ? 'Stock bajo' : estado(insumo) === 'AGOTADO' ? 'Agotado' : 'Disponible' }}</span></td><td><button type="button" class="btn btn-secondary btn-sm" (click)="abrirInsumo(insumo)">Editar</button></td></tr>
+          }
+        </tbody></table></div>
+      }
+    </section>
+  }
+
+  @if (pestana() === 'movimientos') {
+    <section class="card section-card">
+      <div class="section-head"><div><h2>Movimientos</h2><p>Historial de entradas y salidas de almacén.</p></div><button class="btn btn-primary" type="button" [disabled]="!insumosActivos().length" (click)="abrirModal('movimiento')">+ Registrar movimiento</button></div>
+      @if (errorMovimientos()) { <div class="notice notice-error" role="alert">{{ errorMovimientos() }} <button type="button" (click)="cargarMovimientos()">Reintentar</button></div> }
+      @else if (cargandoMovimientos()) { <p class="state">Cargando movimientos…</p> }
+      @else if (!movimientos().length) { <p class="state">Todavía no se registraron movimientos.</p> }
+      @else {
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Insumo</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th></tr></thead><tbody>
+          @for (movimiento of movimientos(); track movimiento.idMovimiento) {
+            <tr><td>{{ movimiento.fecha | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ nombreInsumo(movimiento.idInsumo) }}</td><td><span class="badge" [class.badge-success]="movimiento.tipo === 'ENTRADA'" [class.badge-warning]="movimiento.tipo === 'SALIDA'">{{ movimiento.tipo }}</span></td><td>{{ movimiento.cantidad | number:'1.0-3' }}</td><td>{{ movimiento.motivo }}</td></tr>
+          }
+        </tbody></table></div>
+      }
+    </section>
+  }
+
+  @if (pestana() === 'recetas') {
+    <section class="card section-card">
+      <div class="section-head"><div><h2>Recetas por plato</h2><p>Ingredientes y consumo manual de stock.</p></div></div>
+      @if (errorPlatos()) { <div class="notice notice-error" role="alert">{{ errorPlatos() }} <button type="button" (click)="cargarPlatos()">Reintentar</button></div> }
+      @else if (cargandoPlatos()) { <p class="state">Cargando platos…</p> }
+      @else if (!platos().length) { <p class="state">No hay platos registrados.</p> }
+      @else {
+        <div class="form-group plato-selector"><label class="form-label" for="plato-receta">Plato</label><select #platoInput id="plato-receta" class="form-control" [value]="platoId() ?? ''" (change)="seleccionarPlato(platoInput.value)"><option value="">Seleccionar plato</option>@for (plato of platos(); track plato.idPlato) { <option [value]="plato.idPlato">{{ plato.nombre }}</option> }</select></div>
+        @if (platoId() !== null) {
+          <div class="section-head subhead"><h3>Ingredientes de {{ platoSeleccionado()?.nombre }}</h3><div class="actions"><button class="btn btn-secondary btn-sm" type="button" [disabled]="!insumosParaReceta().length" (click)="abrirModal('ingrediente')">+ Ingrediente</button><button class="btn btn-primary btn-sm" type="button" [disabled]="!receta().length || !!errorReceta()" (click)="abrirModal('consumo')">Consumir ingredientes</button></div></div>
+          @if (errorReceta()) { <div class="notice notice-error" role="alert">{{ errorReceta() }} <button type="button" (click)="cargarReceta()">Reintentar</button></div> }
+          @else if (cargandoReceta()) { <p class="state">Cargando receta…</p> }
+          @else if (!receta().length) { <p class="state">Este plato aún no tiene ingredientes en su receta.</p> }
+          @else { <div class="table-wrap"><table><thead><tr><th>Ingrediente</th><th>Cantidad por plato</th><th>Acciones</th></tr></thead><tbody>@for (ingrediente of receta(); track ingrediente.idReceta) { <tr><td>{{ ingrediente.nombreInsumo }}</td><td>{{ ingrediente.cantidadPorPlato | number:'1.0-3' }} {{ ingrediente.unidadMedida }}</td><td><button class="btn btn-danger btn-sm" type="button" (click)="confirmarEliminar(ingrediente)">Eliminar</button></td></tr> }</tbody></table></div> }
+          @if (resultadoConsumo(); as resultado) { <div class="notice" role="status">Consumo de {{ resultado.cantidadPlatos }} plato(s) confirmado. Se registraron {{ resultado.movimientos.length }} salida(s).</div> }
+        }
+      }
+    </section>
+  }
+
+  @if (modal()) {
+    <div class="modal-backdrop" (click)="cerrarModal()"><div class="modal-content" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h2>{{ modal() === 'insumo' ? editandoId() === null ? 'Nuevo insumo' : 'Editar insumo' : modal() === 'movimiento' ? 'Registrar movimiento' : modal() === 'ingrediente' ? 'Agregar ingrediente' : modal() === 'consumo' ? 'Confirmar consumo manual' : 'Eliminar ingrediente' }}</h2><button class="close-btn" type="button" [disabled]="guardando()" aria-label="Cerrar" (click)="cerrarModal()">×</button></div>
+      @if (modal() === 'insumo') {
+        <form [formGroup]="insumoForm" (ngSubmit)="guardarInsumo()">
+          <div class="form-group"><label class="form-label" for="insumo-nombre">Nombre</label><input id="insumo-nombre" class="form-control" formControlName="nombre" maxlength="100">@if (insumoForm.controls.nombre.touched && insumoForm.controls.nombre.invalid) { <span class="form-error">Ingresa un nombre.</span> }</div>
+          @if (editandoId() === null) { <div class="form-group"><label class="form-label" for="insumo-unidad">Unidad de medida</label><input id="insumo-unidad" class="form-control" formControlName="unidadMedida" maxlength="15" placeholder="KG, L, UND">@if (insumoForm.controls.unidadMedida.touched && insumoForm.controls.unidadMedida.invalid) { <span class="form-error">Ingresa la unidad de medida.</span> }</div> }
+          <div class="form-group"><label class="form-label" for="insumo-minimo">Stock mínimo</label><input id="insumo-minimo" class="form-control" type="number" step="0.001" min="0" formControlName="stockMinimo">@if (insumoForm.controls.stockMinimo.touched && insumoForm.controls.stockMinimo.invalid) { <span class="form-error">Ingresa un número no negativo, con hasta 3 decimales.</span> }</div>
+          @if (editandoId() !== null) { <label class="checkbox-row"><input type="checkbox" formControlName="activo"> Insumo activo</label> }
+          <p class="hint">El stock inicial es cero. Registra una entrada para agregar existencias.</p>
+          @if (errorFormulario()) { <p class="form-error" role="alert">{{ errorFormulario() }}</p> }
+          <div class="modal-actions"><button class="btn btn-secondary" type="button" [disabled]="guardando()" (click)="cerrarModal()">Cancelar</button><button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Guardar insumo' }}</button></div>
+        </form>
+      }
+      @if (modal() === 'movimiento') {
+        <form [formGroup]="movimientoForm" (ngSubmit)="guardarMovimiento()">
+          <div class="form-group"><label class="form-label" for="mov-insumo">Insumo</label><select id="mov-insumo" class="form-control" formControlName="idInsumo"><option [ngValue]="0">Seleccionar insumo</option>@for (insumo of insumosActivos(); track insumo.idInsumo) { <option [ngValue]="insumo.idInsumo">{{ insumo.nombre }} ({{ insumo.stockActual | number:'1.0-3' }} {{ insumo.unidadMedida }})</option> }</select>@if (movimientoForm.controls.idInsumo.touched && movimientoForm.controls.idInsumo.invalid) { <span class="form-error">Selecciona un insumo.</span> }</div>
+          <div class="form-group"><label class="form-label" for="mov-tipo">Tipo</label><select id="mov-tipo" class="form-control" formControlName="tipo"><option value="ENTRADA">Entrada</option><option value="SALIDA">Salida</option></select></div>
+          <div class="form-group"><label class="form-label" for="mov-cantidad">Cantidad</label><input id="mov-cantidad" class="form-control" type="number" min="0.001" step="0.001" formControlName="cantidad">@if (movimientoForm.controls.cantidad.touched && movimientoForm.controls.cantidad.invalid) { <span class="form-error">La cantidad debe ser mayor que cero y tener hasta 3 decimales.</span> }</div>
+          <div class="form-group"><label class="form-label" for="mov-motivo">Motivo</label><input id="mov-motivo" class="form-control" formControlName="motivo" maxlength="200">@if (movimientoForm.controls.motivo.touched && movimientoForm.controls.motivo.invalid) { <span class="form-error">Ingresa un motivo.</span> }</div>
+          @if (errorFormulario()) { <p class="form-error" role="alert">{{ errorFormulario() }}</p> }
+          <div class="modal-actions"><button class="btn btn-secondary" type="button" [disabled]="guardando()" (click)="cerrarModal()">Cancelar</button><button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Registrar movimiento' }}</button></div>
+        </form>
+      }
+      @if (modal() === 'ingrediente') {
+        <form [formGroup]="ingredienteForm" (ngSubmit)="guardarIngrediente()">
+          <div class="form-group"><label class="form-label" for="rec-insumo">Insumo</label><select id="rec-insumo" class="form-control" formControlName="idInsumo"><option [ngValue]="0">Seleccionar insumo</option>@for (insumo of insumosParaReceta(); track insumo.idInsumo) { <option [ngValue]="insumo.idInsumo">{{ insumo.nombre }} ({{ insumo.unidadMedida }})</option> }</select>@if (ingredienteForm.controls.idInsumo.touched && ingredienteForm.controls.idInsumo.invalid) { <span class="form-error">Selecciona un insumo.</span> }</div>
+          <div class="form-group"><label class="form-label" for="rec-cantidad">Cantidad por plato</label><input id="rec-cantidad" class="form-control" type="number" min="0.001" step="0.001" formControlName="cantidadPorPlato">@if (ingredienteForm.controls.cantidadPorPlato.touched && ingredienteForm.controls.cantidadPorPlato.invalid) { <span class="form-error">Ingresa una cantidad positiva, con hasta 3 decimales.</span> }</div>
+          @if (errorFormulario()) { <p class="form-error" role="alert">{{ errorFormulario() }}</p> }
+          <div class="modal-actions"><button class="btn btn-secondary" type="button" [disabled]="guardando()" (click)="cerrarModal()">Cancelar</button><button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Agregar ingrediente' }}</button></div>
+        </form>
+      }
+      @if (modal() === 'consumo') {
+        <form [formGroup]="consumoForm" (ngSubmit)="consumir()"><p class="confirm-text">Se descontarán del inventario los ingredientes de <strong>{{ platoSeleccionado()?.nombre }}</strong>. Esta operación registra salidas reales y no debe repetirse para el mismo consumo.</p><div class="form-group"><label class="form-label" for="cantidad-platos">Cantidad de platos</label><input id="cantidad-platos" class="form-control" type="number" min="1" step="1" formControlName="cantidadPlatos">@if (consumoForm.controls.cantidadPlatos.touched && consumoForm.controls.cantidadPlatos.invalid) { <span class="form-error">Ingresa un entero mayor que cero.</span> }</div>@if (errorFormulario()) { <p class="form-error" role="alert">{{ errorFormulario() }}</p> }<div class="modal-actions"><button class="btn btn-secondary" type="button" [disabled]="guardando()" (click)="cerrarModal()">Cancelar</button><button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ guardando() ? 'Descontando…' : 'Confirmar consumo' }}</button></div></form>
+      }
+      @if (modal() === 'eliminar') { <p class="confirm-text">¿Eliminar <strong>{{ ingredienteEliminar()?.nombreInsumo }}</strong> de la receta de {{ platoSeleccionado()?.nombre }}?</p>@if (errorFormulario()) { <p class="form-error" role="alert">{{ errorFormulario() }}</p> }<div class="modal-actions"><button class="btn btn-secondary" type="button" [disabled]="guardando()" (click)="cerrarModal()">Cancelar</button><button class="btn btn-danger" type="button" [disabled]="guardando()" (click)="eliminarIngrediente()">{{ guardando() ? 'Eliminando…' : 'Eliminar' }}</button></div> }
+    </div></div>
+  }
+</div>

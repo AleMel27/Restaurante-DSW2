@@ -50,6 +50,12 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'CHEF'] }
       },
       {
+        path: 'inventario',
+        loadComponent: () => import('./features/inventario/inventario.component').then(m => m.InventarioComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'CHEF'] }
+      },
+      {
         path: 'atenciones',
         loadComponent: () => import('./features/atenciones/atenciones-list.component').then(m => m.AtencionesListComponent),
         canActivate: [roleGuard],

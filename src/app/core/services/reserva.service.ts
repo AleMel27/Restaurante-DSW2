@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ReservaRequest, ReservaResponse } from '../models/reserva.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservaService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/reservas'; 
+  private apiUrl = `${environment.apiUrl}/reservas`;
 
   listarReservas(): Observable<ReservaResponse[]> {
     return this.http.get<ReservaResponse[]>(this.apiUrl);
