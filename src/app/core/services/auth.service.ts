@@ -15,10 +15,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  // Signal reactivo para el usuario autenticado
   readonly currentUser = signal<LoginResponse | null>(this.getStoredUser());
 
-  // Señales computadas
   readonly isAuthenticated = computed(() => !!this.currentUser());
   readonly currentRole = computed(() => this.currentUser()?.rol ?? null);
   readonly currentUserName = computed(() => {
@@ -67,7 +65,6 @@ export class AuthService {
       const userStr = localStorage.getItem(USER_KEY);
       if (!token || !userStr) return null;
 
-      // Verificar si el token ha expirado
       const decoded = this.decodeToken(token);
       if (decoded && decoded.exp && decoded.exp * 1000 < Date.now()) {
         localStorage.removeItem(TOKEN_KEY);

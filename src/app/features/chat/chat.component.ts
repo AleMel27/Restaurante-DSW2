@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../../core/services/chat.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-chat',
@@ -16,15 +17,23 @@ export class ChatComponent implements OnInit, OnDestroy {
   messageText: string = '';
   private chatSub!: Subscription;
 
-  constructor(private chatService: ChatService) {}
+  private chatService = inject(ChatService);
+  private authService = inject(AuthService);
+  private ngZone = inject(NgZone);
 
   ngOnInit(): void {
-    const username = prompt('Ingresa tu nombre:') || 'Anónimo';
+    const username = this.authService.currentUserName() || 'Usuario Anónimo';
     
     this.chatService.connect(username);
 
+    if (this.chatSub) {
+      this.chatSub.unsubscribe();
+    }
+
     this.chatSub = this.chatService.getMessages().subscribe((msg) => {
-      this.messages.push(msg);
+      this.ngZone.run(() => {
+        this.messages.push(msg);
+      });
     });
   }
 

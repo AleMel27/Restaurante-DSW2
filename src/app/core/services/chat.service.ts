@@ -5,17 +5,20 @@ import { Observable, Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class ChatService {
-  private socket!: WebSocket;
+  private socket: WebSocket | null = null;
   private messageSubject = new Subject<string>();
 
   constructor() {}
 
   public connect(username: string): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      return;
+    }
+
     this.socket = new WebSocket('ws://localhost:8887');
 
     this.socket.onopen = () => {
-      console.log('Conectado al servidor WebSocket de Java');
-      this.socket.send(username);
+      this.socket?.send(username);
     };
 
     this.socket.onmessage = (event) => {
@@ -24,6 +27,7 @@ export class ChatService {
 
     this.socket.onclose = () => {
       console.log('Desconectado del servidor');
+      this.socket = null;
     };
 
     this.socket.onerror = (error) => {
