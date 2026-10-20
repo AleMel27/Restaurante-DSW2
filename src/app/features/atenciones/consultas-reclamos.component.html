@@ -4,14 +4,20 @@
       <h1 class="page-title">Centro de Atención al Cliente</h1>
     </div>
 
-    <!-- Pestañas -->
-    <div class="tab-switcher">
-      <button class="tab-btn" [class.active]="tabActivo() === 'RECLAMOS'" (click)="tabActivo.set('RECLAMOS')">
-        Reclamos ({{ reclamos().length }})
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="abrirCrear()" [disabled]="cargandoClientes()">
+        {{ cargandoClientes() ? 'Cargando clientes...' : 'Añadir ' + (tabActivo() === 'CONSULTAS' ? 'consulta' : 'reclamo') }}
       </button>
-      <button class="tab-btn" [class.active]="tabActivo() === 'CONSULTAS'" (click)="tabActivo.set('CONSULTAS')">
-        Consultas ({{ consultas().length }})
-      </button>
+
+      <!-- Pestañas -->
+      <div class="tab-switcher">
+        <button class="tab-btn" [class.active]="tabActivo() === 'RECLAMOS'" (click)="tabActivo.set('RECLAMOS')">
+          Reclamos ({{ reclamos().length }})
+        </button>
+        <button class="tab-btn" [class.active]="tabActivo() === 'CONSULTAS'" (click)="tabActivo.set('CONSULTAS')">
+          Consultas ({{ consultas().length }})
+        </button>
+      </div>
     </div>
   </div>
 
@@ -211,6 +217,72 @@
             <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
             <button type="submit" class="btn btn-primary">
               {{ modalTipo() === 'RECLAMO' ? 'Registrar Resolución' : 'Enviar Respuesta' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showCreateModal()) {
+    <div class="modal-backdrop" (click)="cerrarCrear()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            Añadir {{ tipoNuevo() === 'CONSULTAS' ? 'consulta' : 'reclamo' }}
+          </h2>
+          <button class="close-btn" (click)="cerrarCrear()">&times;</button>
+        </div>
+
+        <form [formGroup]="nuevoForm" (ngSubmit)="guardarNuevo()">
+          <div class="form-group">
+            <label class="form-label" for="cliente-atencion">Cliente</label>
+            <select id="cliente-atencion" class="form-control" formControlName="idCliente">
+              <option [ngValue]="null" disabled>Seleccione un cliente</option>
+              @for (cliente of clientes(); track cliente.idcliente) {
+                <option [ngValue]="cliente.idcliente">
+                  {{ cliente.nombres }} {{ cliente.apellidos }} (DNI: {{ cliente.dni }})
+                </option>
+              }
+            </select>
+            @if (clientes().length === 0) {
+              <span class="form-error">No hay clientes registrados.</span>
+            }
+          </div>
+
+          @if (tipoNuevo() === 'CONSULTAS') {
+            <div class="form-group">
+              <label class="form-label" for="asunto-consulta">Asunto</label>
+              <input id="asunto-consulta" type="text" class="form-control" formControlName="asunto"
+                     placeholder="Escriba el asunto de la consulta" />
+              @if (nuevoForm.get('asunto')?.invalid && nuevoForm.get('asunto')?.touched) {
+                <span class="form-error">El asunto debe tener al menos 3 caracteres.</span>
+              }
+            </div>
+          } @else {
+            <div class="form-group">
+              <label class="form-label" for="motivo-reclamo">Motivo</label>
+              <input id="motivo-reclamo" type="text" class="form-control" formControlName="motivo"
+                     placeholder="Escriba el motivo del reclamo" />
+              @if (nuevoForm.get('motivo')?.invalid && nuevoForm.get('motivo')?.touched) {
+                <span class="form-error">El motivo debe tener al menos 3 caracteres.</span>
+              }
+            </div>
+          }
+
+          <div class="form-group">
+            <label class="form-label" for="descripcion-atencion">Descripción</label>
+            <textarea id="descripcion-atencion" class="form-control" formControlName="descripcion" rows="4"
+                      placeholder="Describa su consulta o reclamo..."></textarea>
+            @if (nuevoForm.get('descripcion')?.invalid && nuevoForm.get('descripcion')?.touched) {
+              <span class="form-error">La descripción debe tener al menos 5 caracteres.</span>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarCrear()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              Registrar {{ tipoNuevo() === 'CONSULTAS' ? 'consulta' : 'reclamo' }}
             </button>
           </div>
         </form>
