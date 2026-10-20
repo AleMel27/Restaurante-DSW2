@@ -65,9 +65,13 @@ export class ReservasListComponent implements OnInit {
     return this.reservas().filter(r => r.estado === f);
   }
 
+  get mesasDisponibles(): Mesa[] {
+    return this.mesas().filter(mesa => mesa.estado === 'DISPONIBLE');
+  }
+
   abrirNuevaReserva(): void {
     this.reservaForm.reset({
-      idMesa: this.mesas().length > 0 ? this.mesas()[0].idMesa : null,
+      idMesa: this.mesasDisponibles[0]?.idMesa ?? null,
       nombreCliente: '',
       telefono: '',
       fecha: '',

@@ -109,12 +109,15 @@
               <label class="form-label">Mesa</label>
               <select class="form-control" formControlName="idMesa">
                 <option [ngValue]="null" disabled>Seleccione una mesa...</option>
-                @for (mesa of mesas(); track mesa.idMesa) {
-                  <option [value]="mesa.idMesa">
-                    Mesa #{{ mesa.numero }} (Cap: {{ mesa.capacidad }} pers. - {{ mesa.estado }})
+                @for (mesa of mesasDisponibles; track mesa.idMesa) {
+                  <option [ngValue]="mesa.idMesa">
+                    Mesa #{{ mesa.numero }} (Cap: {{ mesa.capacidad }} pers.)
                   </option>
                 }
               </select>
+              @if (mesasDisponibles.length === 0) {
+                <span class="form-error">No hay mesas disponibles para reservar.</span>
+              }
             </div>
 
             <div class="form-group">
@@ -137,7 +140,9 @@
 
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Registrar Reserva</button>
+            <button type="submit" class="btn btn-primary" [disabled]="mesasDisponibles.length === 0">
+              Registrar Reserva
+            </button>
           </div>
         </form>
       </div>
