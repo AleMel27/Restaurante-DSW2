@@ -49,12 +49,32 @@ export class InventarioComponent implements OnInit {
   readonly filtroEstado = signal<'TODOS' | 'DISPONIBLE' | 'BAJO' | 'AGOTADO'>('TODOS');
   readonly platoId = signal<number | null>(null);
 
+  // Configuración de Paginación
+  readonly tamanoPagina = signal<number>(10);
+  readonly paginaInsumos = signal<number>(1);
+  readonly paginaMovimientos = signal<number>(1);
+
   readonly totalBajo = computed(() => this.insumos().filter(i => i.stockActual > 0 && i.stockActual <= i.stockMinimo).length);
   readonly totalAgotado = computed(() => this.insumos().filter(i => i.stockActual <= 0).length);
+  
   readonly insumosFiltrados = computed(() => this.insumos().filter(i =>
     i.nombre.toLocaleLowerCase().includes(this.busqueda().trim().toLocaleLowerCase()) &&
     (this.filtroEstado() === 'TODOS' || this.estado(i) === this.filtroEstado())
   ));
+
+  // Elementos paginados
+  readonly totalPaginasInsumos = computed(() => Math.max(1, Math.ceil(this.insumosFiltrados().length / this.tamanoPagina())));
+  readonly insumosPaginados = computed(() => {
+    const inicio = (this.paginaInsumos() - 1) * this.tamanoPagina();
+    return this.insumosFiltrados().slice(inicio, inicio + this.tamanoPagina());
+  });
+
+  readonly totalPaginasMovimientos = computed(() => Math.max(1, Math.ceil(this.movimientos().length / this.tamanoPagina())));
+  readonly movimientosPaginados = computed(() => {
+    const inicio = (this.paginaMovimientos() - 1) * this.tamanoPagina();
+    return this.movimientos().slice(inicio, inicio + this.tamanoPagina());
+  });
+
   readonly insumosActivos = computed(() => this.insumos().filter(i => i.activo));
   readonly insumosParaReceta = computed(() => this.insumosActivos().filter(i => !this.receta().some(r => r.idInsumo === i.idInsumo)));
 
@@ -136,6 +156,7 @@ export class InventarioComponent implements OnInit {
   cambiarEstado(valor: string): void {
     if (valor === 'TODOS' || valor === 'DISPONIBLE' || valor === 'BAJO' || valor === 'AGOTADO') {
       this.filtroEstado.set(valor);
+      this.paginaInsumos.set(1); 
     }
   }
 
